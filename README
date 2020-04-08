@@ -1,0 +1,8 @@
+AUTOSCALE is an experiment in creating dynamic music scaling.
+User defines first key to start with;
+Chooses harmonic ratios (not working for now);
+Chooses the scale steppe (the first number being the number of octaves that the span relates to, the second the amount of intervals in the span)
+
+Then the user must load the data to the system and can then either autogenerate a 8 step up & down scale or play the dynamic piano
+
+Uses Tone.js
