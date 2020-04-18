@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AutoScale</title>
+
+    <script src="https://unpkg.com/@webcomponents/webcomponentsjs@^2/webcomponents-bundle.js"></script>
+    <script src="https://unpkg.com/tone"></script>
+    <script src="https://unpkg.com/@tonejs/ui"></script>
+
+ 	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+</head>
+<style>
+	.circle {
+	  height: 100px;
+	  width: 100px;
+	  background-color: #bbb;
+	  border-radius: 50%;
+	  border: 2px solid black;
+	  position: absolute;
+	}
+	#piano {
+		position: absolute;
+		left: 50vw;
+		top: 50vh;
+	}
+
+
+    .form {
+        font-family: Hermetica;
+        font-size: 6vmin;
+        background: none;
+        border: none;
+        border-bottom: 1vmin solid red;
+        border-radius: 2vmin;
+        transition: 3.5s;
+    }
+    .form:focus {
+        background: grey;
+    }
+    .key {
+        background: snow;
+        border-left: 0.5vmin solid black;
+        border-bottom: 1vmin solid black;
+        width: 18%;
+        float: left;
+        display: inline-block;
+        height: 10vw;
+        transition: 50ms;
+    }
+    .key:active {
+
+        border-top: 1vmin solid black;
+        border-right: 0.5vmin solid black;
+        border-left: 0 solid black;
+        border-bottom: 0 solid black;
+    }
+</style>
+
+<body >
+	<div id="piano">
+  		<!-- <span class="circle"></span> -->
+	</div>
+
+<!-- <tone-demo autoplay>
+<div style="width:90vw;margin-left:-22vw;">
+    <form style="line-height:6vmin;font-size:6vmin !important;font-family:Hermetica !important;">
+        <h1>AutoScale</h1>
+        <h3> experiment of scaling music by math</h3>
+        <label for="h">starting tone (Hz):</label>
+        <input class="form" type="number" id="h" name="h" min="100" max="1000" value="432">
+        <br>
+        <label for="hr">Harmonics </label>
+        <input class="form" type="number" id="hr" name="hr" min="1" max="360" value="60">
+        <input class="form" type="number" id="hr2" name="hr2" min="1" max="360" value="90">
+        <br>
+        <label>ratio steppe:</label>
+        <br>
+        <input class="form" type="number" id="r1" name="r1" min="0" max="360" value="2">
+        /
+        <input class="form" type="number" id="r2" name="r2" min="1" max="360" value="12">
+    </form>
+
+    <button id = "startbutton" aria-label="Start">load</button>
+    <button id = "scalebutton" aria-label="Scale">scale</button>
+    <button id = "stopbutton" aria-label="Stop">no</button>
+    <button id = "buildbutton" aria-label="Build">no</button>
+    <br>
+    <div class="key" id="lolowkey">lolo</div>
+    <div class="key" id="lowkey">lo</div>
+    <div class="key" id="midkey">mid</div>
+    <div class="key" id="hikey">hi</div>
+    <div class="key" id="hihikey">hihi</div>
+</div>
+</tone-demo>
+ --></body>
+<script>
+let piano = [];
+let r = 50;
+let jmax;
+let degstep;
+let degfirst;
+let degree;
+
+let Red;
+let Blue;
+let Green;
+
+function deg2rad(deg){
+	// console.log(deg, "lets convert");
+	let rad;
+	rad = deg * Math.PI / 180;
+	return rad;
+}
+
+function freq2rgb(Wavelength){
+	console.log(Wavelength);
+	let Gamma = 0.80;
+	let IntensityMax = 255;
+/** Taken from Earl F. Glynn's web page:
+* <a href="http://www.efg2.com/Lab/ScienceAndEngineering/Spectra.htm">Spectra Lab Report</a>
+* */
+    if((Wavelength >= 380) && (Wavelength<440)){
+        Red = -(Wavelength - 440) / (440 - 380);
+        Green = 0.0;
+        Blue = 1.0;
+    }else if((Wavelength >= 440) && (Wavelength<490)){
+        Red = 0.0;
+        Green = (Wavelength - 440) / (490 - 440);
+        Blue = 1.0;
+    }else if((Wavelength >= 490) && (Wavelength<510)){
+        Red = 0.0;
+        Green = 1.0;
+        Blue = -(Wavelength - 510) / (510 - 490);
+    }else if((Wavelength >= 510) && (Wavelength<580)){
+        Red = (Wavelength - 510) / (580 - 510);
+        Green = 1.0;
+        Blue = 0.0;
+    }else if((Wavelength >= 580) && (Wavelength<645)){
+        Red = 1.0;
+        Green = -(Wavelength - 645) / (645 - 580);
+        Blue = 0.0;
+    }else if((Wavelength >= 645) && (Wavelength<781)){
+        Red = 1.0;
+        Green = 0.0;
+        Blue = 0.0;
+    }else{
+        Red = 0.0;
+        Green = 0.0;
+        Blue = 0.0;
+    };
+
+    // Let the intensity fall off near the vision limits
+
+    if((Wavelength >= 380) && (Wavelength<420)){
+        factor = 0.3 + 0.7*(Wavelength - 380) / (420 - 380);
+    }else if((Wavelength >= 420) && (Wavelength<701)){
+        factor = 1.0;
+    }else if((Wavelength >= 701) && (Wavelength<781)){
+        factor = 0.3 + 0.7*(780 - Wavelength) / (780 - 700);
+    }else{
+        factor = 0.0;
+    };
+
+
+    rgb = [];
+
+    // Don't want 0^x = 1 for x <> 0
+    rgb[0] = Math.round(IntensityMax * Math.pow(Red * factor, Gamma));
+    rgb[1] = Math.round(IntensityMax * Math.pow(Green * factor, Gamma));
+    rgb[2] = Math.round(IntensityMax * Math.pow(Blue * factor, Gamma));
+
+    return rgb;
+}
+
+for (i = 0; i < 6; i++) {
+	if (i === 0) {
+		console.log("first i", i);
+		degree = 0.5;
+		$("#piano").append("<span id='circle" + i + degree + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;'></span>");
+	}
+	if (i > 0){
+		if (i === 1) {
+			degstep = 90;
+			degfirst = 45;
+			jmax = 4;
+			// degree = 0;
+		}
+		if(i === 2) {
+			degstep = 30;
+			degfirst = 30;
+			jmax = 11;
+		}
+		if (i === 3) {
+			degstep = 22.5
+			degfirst = 22.5;
+			jmax = 15
+		}
+		if (i === 4) {
+			jmax = 19;
+			degstep = 18;
+			degfirst = 18;
+		}
+		if (i === 5) {
+			jmax = 23
+			degstep = 15;
+			degfirst = 15;
+		}
+		// degstep = 360 / jmax;
+		console.log("circle #", i, "should do", jmax, "starting from", degfirst, "jumpingby", degstep);
+		for (j = 0; j < jmax; j++) {
+			degree = deg2rad(degfirst + j * degstep);
+			freq2rgb(degree*160 / Math.PI + 380); // NEET TO NORMALIZE EITHER HERE OR IN FUNCTION // NEED TO NORMALIZE WITH RANGE COMPARISON ? OR NORMALIZE TO 360 DEGREES
+
+			$("#piano").append("<span id='circle" + i + "." + j + "-" + Math.round(degree) + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;background-color:rgb(" + Red * 255 + "," + Green * 255 + "," +  Blue * 255 + ")'></span>");
+		}
+	}
+}
+
+
+
+
+    //create a synth and connect it to the master output (your speakers)
+    // var synth = new Tone.PolySynth(3, Tone.AMSynth).toMaster()
+
+
+    // let s = 500;
+    // let sd = 2;
+    // let depth = 5;
+    // let i = 0;
+    // let one = 1;
+    // let h = 0;
+    // let hr = 0;
+    // let hr2 = 0;
+    // let r = 0;
+    // startbutton.onclick = function() {
+    //     i = 0;
+    //     one = 1;
+    //     h = document.getElementById("h").value; // main freq
+
+    //     hr = document.getElementById("hr").value;
+    //     if (hr !== "0") {
+    //         hr = Math.pow (2, 1 / document.getElementById("hr").value);
+    //     } //first harmonic
+
+    //     hr2 = document.getElementById("hr2").value;
+    //     if (hr2 !== "0") {
+    //         hr2 = Math.pow (2, 1 / document.getElementById("hr2").value);
+    //     } //second harmonic. ToDo - make this a loop for infinitish harmonics
+
+    //     r = Math.pow(document.getElementById("r1").value, 1 / document.getElementById("r2").value);
+    //     if (r < 0.5) {
+    //         r += 1;
+    //     }
+    //     console.log("ratio steppe is", r, "harmonic steppe is", hr,  " and ", hr2);
+    // };
+    // scalebutton.onclick = function() {
+    //     console.log("ratio steppe is", r, "harmonic steppe is", hr, " and ", hr2);
+    //     myVar = setInterval(function () {
+    //         console.log("playing", i, h, "harmonic1", h * hr, "harmonic2", h * hr2);
+    //         if (hr2 !== 0 && hr !== 0) {
+    //         synth.triggerAttackRelease([h, h * hr, h * hr2], '0.5');
+    //         }
+    //         if (hr2 !== 0 && hr === 0 ) {
+    //             synth.triggerAttackRelease([h, h * hr2], '0.5');
+    //         }
+    //         if (hr2 === 0 && hr !== 0) {
+    //             synth.triggerAttackRelease([h, h * hr], '0.5');
+    //         }
+    //         if (hr2 === 0 && hr === 0) {
+    //             synth.triggerAttackRelease([h], '0.5');
+    //         }
+    //         // synth.triggerAttackRelease(h * hr, '1', '0.50'); //  DOUBLE FREQ SEEMS NOT TO WORK EH...
+    //         // synth.triggerAttackRelease(h * hr, '0.5', '0.1');    SO HOW SHOULD I DO HARMONICS??
+
+    //         i += one;
+    //         h = h * r;  //Math.pow(r, i);
+    //         Math.round(h);
+    //         Math.round(hr);
+    //         Math.round(hr2);
+
+    //         if (i === depth) {
+    //             one = -1;
+    //             r = 1 / r;
+    //         }
+    //         if (i === -1) {
+    //             clearInterval(myVar);
+    //             console.log("ended", depth, " stepps;");
+    //         }
+    //     }, s);
+    // };
+    // stopbutton.onclick = function() {
+    //     clearInterval(myVar);
+    // };
+
+    // midkey.ontouchstart = function() {
+    //     synth.triggerAttack([h, h*hr, h*hr2]);
+    // };
+    // midkey.ontouchend = function() {
+    //     synth.triggerRelease([h, h*hr, h*hr2]);
+    //     console.log(h);
+    // };
+    // lowkey.ontouchstart = function() {
+    //     h = h / r;
+    //     synth.triggerAttack([h, h*hr, h*hr2]);
+    // };
+    // lowkey.ontouchend = function() {
+    //     synth.triggerRelease([h, h*hr, h*hr2]);
+    //     console.log(h);
+    // };
+    // lolowkey.ontouchstart = function() {
+    //     h = h / Math.pow (r, 1.5);
+    //     synth.triggerAttack([h, h*hr, h*hr2]);
+    // };
+    // lolowkey.ontouchend = function() {
+    //     synth.triggerRelease([h, h*hr, h*hr2]);
+    //     console.log(h);
+    // };
+    // hikey.ontouchstart = function() {
+    //     h = h * r;
+    //     synth.triggerAttack([h, h*hr, h*hr2]);
+    // };
+    // hikey.ontouchend = function() {
+    //     synth.triggerRelease([h, h*hr, h*hr2]);
+    //     console.log(h);
+    // };
+    // hihikey.ontouchstart = function() {
+    //     h = h * Math.pow (r, 1.5);
+    //     synth.triggerAttack([h, h*hr, h*hr2]);
+    // };
+    // hihikey.ontouchend = function() {
+    //     synth.triggerRelease([h, h*hr, h*hr2]);
+    //     console.log(h);
+    // }
+</script>
+</html>
