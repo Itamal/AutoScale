@@ -6,3 +6,5 @@ Chooses the scale steppe (the first number being the number of octaves that the 
 Then the user must load the data to the system and can then either autogenerate a 8 step up & down scale or play the dynamic piano
 
 Uses Tone.js
+
+CIRCLE is an experimental UX to explore the ratios differences of music
