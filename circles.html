@@ -115,7 +115,7 @@ function deg2rad(deg){
 }
 
 function freq2rgb(Wavelength){
-	console.log(Wavelength);
+	// console.log(Wavelength);
 	let Gamma = 0.80;
 	let IntensityMax = 255;
 /** Taken from Earl F. Glynn's web page:
@@ -174,18 +174,21 @@ function freq2rgb(Wavelength){
     return rgb;
 }
 
+
+// - - - - - create circles
+
+
 for (i = 0; i < 6; i++) {
 	if (i === 0) {
 		console.log("first i", i);
 		degree = 0.5;
-		$("#piano").append("<span id='circle" + i + degree + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;'></span>");
+		$("#piano").append("<span id='circle" + i + degree + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;'></span>"); // create center circle
 	}
-	if (i > 0){
+	if (i > 0){ // all others
 		if (i === 1) {
 			degstep = 90;
 			degfirst = 45;
 			jmax = 4;
-			// degree = 0;
 		}
 		if(i === 2) {
 			degstep = 30;
@@ -193,24 +196,27 @@ for (i = 0; i < 6; i++) {
 			jmax = 11;
 		}
 		if (i === 3) {
-			degstep = 22.5
+			degstep = 45
 			degfirst = 22.5;
-			jmax = 15
+			jmax = 8
 		}
 		if (i === 4) {
+            degstep = 18;
+            degfirst = 18;
 			jmax = 19;
-			degstep = 18;
-			degfirst = 18;
 		}
 		if (i === 5) {
+            degstep = 15;
+            degfirst = 15;
 			jmax = 23
-			degstep = 15;
-			degfirst = 15;
 		}
 		// degstep = 360 / jmax;
 		console.log("circle #", i, "should do", jmax, "starting from", degfirst, "jumpingby", degstep);
 		for (j = 0; j < jmax; j++) {
 			degree = deg2rad(degfirst + j * degstep);
+            // if(i === 3) {
+            //     console.log(i, "- - ", j, "- -", degree);
+            // }
 			freq2rgb(degree*160 / Math.PI + 380); // NEET TO NORMALIZE EITHER HERE OR IN FUNCTION // NEED TO NORMALIZE WITH RANGE COMPARISON ? OR NORMALIZE TO 360 DEGREES
 
 			$("#piano").append("<span id='circle" + i + "." + j + "-" + Math.round(degree) + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;background-color:rgb(" + Red * 255 + "," + Green * 255 + "," +  Blue * 255 + ")'></span>");
