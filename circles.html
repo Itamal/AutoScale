@@ -217,16 +217,30 @@ for (i = 0; i < 6; i++) {
             // if(i === 3) {
             //     console.log(i, "- - ", j, "- -", degree);
             // }
-			freq2rgb(degree*160 / Math.PI + 380); // NEET TO NORMALIZE EITHER HERE OR IN FUNCTION // NEED TO NORMALIZE WITH RANGE COMPARISON ? OR NORMALIZE TO 360 DEGREES
+			freq2rgb(degree*145 / Math.PI + 370); // NEET TO NORMALIZE EITHER HERE OR IN FUNCTION // NEED TO NORMALIZE WITH RANGE COMPARISON ? OR NORMALIZE TO 360 DEGREES
 
-			$("#piano").append("<span id='circle" + i + "." + j + "-" + Math.round(degree) + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;background-color:rgb(" + Red * 255 + "," + Green * 255 + "," +  Blue * 255 + ")'></span>");
+			$("#piano").append("<span id='circle" + i + "." + j + "-" + Math.round(degree) + "' class='circle' style='left:" + 2 * r * i * Math.sin(degree) + "px;top:" + 2 * r * i * Math.cos(degree) + "px;background-color:rgb(" + Red * 255 + "," + Green * 255 + "," +  Blue * 255 + ")' onclick='playdeg(" + degree + ")'></span>");
 		}
 	}
 }
 
+// synth v.1
+var synth = new Tone.PolySynth(3, Tone.AMSynth).toMaster()
+function playdeg(deg) {
+    
+    h = 432 * deg/Math.PI ;
+
+    console.log("playing", h);
+
+    synth.triggerAttack([h, h-1, h+1]);
+    stopdeg(h);
+};
+function stopdeg(h) {
+    setTimeout( function (){ synth.triggerRelease([h, h-1, h+1]); }, 200);
+};
 
 
-
+// synth v.0
     //create a synth and connect it to the master output (your speakers)
     // var synth = new Tone.PolySynth(3, Tone.AMSynth).toMaster()
 
