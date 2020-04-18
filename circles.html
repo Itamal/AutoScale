@@ -224,134 +224,34 @@ for (i = 0; i < 6; i++) {
 	}
 }
 
-// synth v.1
-var synth = new Tone.PolySynth(3, Tone.AMSynth).toMaster()
+// synth v.1 - - - - - - -
+// var synth = new Tone.PolySynth(3, Tone.FMSynth).toMaster();
+
+var synth = new Tone.Synth().toMaster()
 function playdeg(deg) {
     
-    h = 432 * deg/Math.PI ;
+    h = 432 * ( deg/Math.PI ) / 2 ;
 
+    h2 = h * 1.001;
+    h3 = h * 0.999;
+
+    h = Math.round(h, 2);
     console.log("playing", h);
-
-    synth.triggerAttack([h, h-1, h+1]);
-    stopdeg(h);
+    play(h);
+    // synth.triggerAttack([h, h2, h3]);
+    // stopdeg(h, h2, h3);
 };
-function stopdeg(h) {
-    setTimeout( function (){ synth.triggerRelease([h, h-1, h+1]); }, 200);
-};
+function play(h){
+    synth.triggerAttackRelease(h, '0.1');
+    // synth.triggerAttackRelease([h], '0.5'); 
+}
+// function stopdeg(h, h2, h3) {
+//     setTimeout( function (){
+//         synth.triggerRelease([h]);
+//         }, 200);
 
+//     // setTimeout( function (){ synth.triggerRelease([h, h2, h3]); }, 200);
+// };
 
-// synth v.0
-    //create a synth and connect it to the master output (your speakers)
-    // var synth = new Tone.PolySynth(3, Tone.AMSynth).toMaster()
-
-
-    // let s = 500;
-    // let sd = 2;
-    // let depth = 5;
-    // let i = 0;
-    // let one = 1;
-    // let h = 0;
-    // let hr = 0;
-    // let hr2 = 0;
-    // let r = 0;
-    // startbutton.onclick = function() {
-    //     i = 0;
-    //     one = 1;
-    //     h = document.getElementById("h").value; // main freq
-
-    //     hr = document.getElementById("hr").value;
-    //     if (hr !== "0") {
-    //         hr = Math.pow (2, 1 / document.getElementById("hr").value);
-    //     } //first harmonic
-
-    //     hr2 = document.getElementById("hr2").value;
-    //     if (hr2 !== "0") {
-    //         hr2 = Math.pow (2, 1 / document.getElementById("hr2").value);
-    //     } //second harmonic. ToDo - make this a loop for infinitish harmonics
-
-    //     r = Math.pow(document.getElementById("r1").value, 1 / document.getElementById("r2").value);
-    //     if (r < 0.5) {
-    //         r += 1;
-    //     }
-    //     console.log("ratio steppe is", r, "harmonic steppe is", hr,  " and ", hr2);
-    // };
-    // scalebutton.onclick = function() {
-    //     console.log("ratio steppe is", r, "harmonic steppe is", hr, " and ", hr2);
-    //     myVar = setInterval(function () {
-    //         console.log("playing", i, h, "harmonic1", h * hr, "harmonic2", h * hr2);
-    //         if (hr2 !== 0 && hr !== 0) {
-    //         synth.triggerAttackRelease([h, h * hr, h * hr2], '0.5');
-    //         }
-    //         if (hr2 !== 0 && hr === 0 ) {
-    //             synth.triggerAttackRelease([h, h * hr2], '0.5');
-    //         }
-    //         if (hr2 === 0 && hr !== 0) {
-    //             synth.triggerAttackRelease([h, h * hr], '0.5');
-    //         }
-    //         if (hr2 === 0 && hr === 0) {
-    //             synth.triggerAttackRelease([h], '0.5');
-    //         }
-    //         // synth.triggerAttackRelease(h * hr, '1', '0.50'); //  DOUBLE FREQ SEEMS NOT TO WORK EH...
-    //         // synth.triggerAttackRelease(h * hr, '0.5', '0.1');    SO HOW SHOULD I DO HARMONICS??
-
-    //         i += one;
-    //         h = h * r;  //Math.pow(r, i);
-    //         Math.round(h);
-    //         Math.round(hr);
-    //         Math.round(hr2);
-
-    //         if (i === depth) {
-    //             one = -1;
-    //             r = 1 / r;
-    //         }
-    //         if (i === -1) {
-    //             clearInterval(myVar);
-    //             console.log("ended", depth, " stepps;");
-    //         }
-    //     }, s);
-    // };
-    // stopbutton.onclick = function() {
-    //     clearInterval(myVar);
-    // };
-
-    // midkey.ontouchstart = function() {
-    //     synth.triggerAttack([h, h*hr, h*hr2]);
-    // };
-    // midkey.ontouchend = function() {
-    //     synth.triggerRelease([h, h*hr, h*hr2]);
-    //     console.log(h);
-    // };
-    // lowkey.ontouchstart = function() {
-    //     h = h / r;
-    //     synth.triggerAttack([h, h*hr, h*hr2]);
-    // };
-    // lowkey.ontouchend = function() {
-    //     synth.triggerRelease([h, h*hr, h*hr2]);
-    //     console.log(h);
-    // };
-    // lolowkey.ontouchstart = function() {
-    //     h = h / Math.pow (r, 1.5);
-    //     synth.triggerAttack([h, h*hr, h*hr2]);
-    // };
-    // lolowkey.ontouchend = function() {
-    //     synth.triggerRelease([h, h*hr, h*hr2]);
-    //     console.log(h);
-    // };
-    // hikey.ontouchstart = function() {
-    //     h = h * r;
-    //     synth.triggerAttack([h, h*hr, h*hr2]);
-    // };
-    // hikey.ontouchend = function() {
-    //     synth.triggerRelease([h, h*hr, h*hr2]);
-    //     console.log(h);
-    // };
-    // hihikey.ontouchstart = function() {
-    //     h = h * Math.pow (r, 1.5);
-    //     synth.triggerAttack([h, h*hr, h*hr2]);
-    // };
-    // hihikey.ontouchend = function() {
-    //     synth.triggerRelease([h, h*hr, h*hr2]);
-    //     console.log(h);
-    // }
 </script>
 </html>
